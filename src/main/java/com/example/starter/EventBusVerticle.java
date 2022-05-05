@@ -9,10 +9,17 @@ public class EventBusVerticle extends AbstractVerticle  {
   // synchronous start(): there should be no blocking the even loop inside the start() method
   // called when verticle is deployed
   public void start() throws Exception {
-    // event bus: it allows different parts of your application to communicate with each other
+    // event bus:
+    //   it allows different parts of your application to communicate with each other, whether they’re in the same or different Vert.x instance
+    //   it supports publish/subscribe, point-to-point, and request-response messaging
     EventBus eventBus = vertx.eventBus();
-    // 1) register a handler to a given address, ex. example.address
-    // ex1. eventBus.consumer([address], [handler])
+
+    // 1) publish/subscribe messaging:
+
+    // consumer subscribes an event bus address
+
+    // ex1. register a handler to a given address, ex. example.address
+    //      eventBus.consumer([address], [handler])
     eventBus.consumer("example.address", message -> {
       System.out.println("Received a message for example.address: " + message.body() + "\n");
     });
@@ -30,23 +37,26 @@ public class EventBusVerticle extends AbstractVerticle  {
       }
     });
 
-    // 2) publish/send a message to a given address
-    // ex1. publish a message
-    eventBus.publish("example.address", "publish to example.address");
-    // the message will be delivered to all handlers registered against the example.address
+    // producer publish/send a message to a given address
+
+    // ex1. publish a message to all subscribers
+    eventBus.publish("example.address", "publish to all subscribers of example.address");
+    // the message will be delivered to all subscribers registered against the example.address
 
     // ex2. send a message
-    // send a message to a single handler of a given address (the handler is chosen in a non-strict round-robin fashion)
-    eventBus.send("example.address", "send to example.address");
+    // send a message to a single subscriber of a given address (the subscriber is chosen in a non-strict round-robin fashion)
+    eventBus.send("example.address", "send to a single subscriber of example.address");
 
-    // 3) acknowledge messages, i.e. request-response pattern
-    // ex1. message.reply: consumer to register a handler to a given address
+    // 2) request-response messaging:
+
+    // consumer acknowledge/reply a message to the producer (request-response pattern)
+    //      message.reply: consumer to register a handler to a given address
     consumer.handler(message -> {
       System.out.println("consumer receives a message & reply: " + message.body() + "\n");
       message.reply(message.body() + " is processed"); // use reply to acknowledge the sender the message is processed
     });
 
-    // ex2. sender: use request method, not publish/send, and specify a reply handler
+    // producer requests with a message and expects a reply with a reply handler
     eventBus.request("example.address", "eventBus.request a message & reply on succeeded", res -> { // reply handler
       if (res.succeeded()) {
         System.out.println("Received reply/acknowledgement: " + res.result().body() + "\n");
