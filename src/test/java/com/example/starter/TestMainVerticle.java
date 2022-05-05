@@ -1,5 +1,7 @@
 package com.example.starter;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -12,7 +14,9 @@ public class TestMainVerticle {
 
   @BeforeEach
   void deploy_verticle(Vertx vertx, VertxTestContext testContext) {
-    vertx.deployVerticle(new MainVerticle(), testContext.succeeding(id -> testContext.completeNow()));
+    MainVerticle verticle = new MainVerticle();
+    Handler<AsyncResult<String>> handler = testContext.succeeding(id -> testContext.completeNow());
+    vertx.deployVerticle(verticle, handler);
   }
 
   @Test

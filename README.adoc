@@ -20,6 +20,7 @@ To run your application:
 ```
 ./mvnw clean compile exec:java
 ```
+verify: http://localhost:8888/
 
 == Help
 
