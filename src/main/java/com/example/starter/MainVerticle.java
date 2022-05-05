@@ -1,9 +1,9 @@
 package com.example.starter;
 
 import io.vertx.core.*;
-import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.http.HttpServer;
+
+// ref: https://vertx.io/docs/vertx-core/java
 
 public class MainVerticle extends AbstractVerticle {
 
@@ -15,12 +15,16 @@ public class MainVerticle extends AbstractVerticle {
     Verticle eventBusVerticle = new EventBusVerticle();
     vertx.deployVerticle(eventBusVerticle, res -> { // add a handler
       if (res.succeeded()) { // handler will be passed a result containing the deployment ID string, if deployment succeeded, which can be used laterto undeploy the deployment
-        System.out.println("eventBusVerticle deployed successfully & deployment id is " + res.result());
+        System.out.println("eventBusVerticle deployed successfully & deployment id is " + res.result() + "\n");
       } else {
-        System.out.println("Deployment failed!");
+        System.out.println("Deployment failed!\n");
       }
     });
-    // vertx.deployVerticle(eventBusVerticle);
+
+    // deploy a verticle with multiple instances, to scale up and utilize multiple cpu cores
+    // ex.
+    // DeploymentOptions options = new DeploymentOptions().setInstances(16);
+    // vertx.deployVerticle("com.mycompany.MyOrderProcessorVerticle", options);
 
     // create an HTTP server & register the request handler
     HttpServer server = this.vertx.createHttpServer();
@@ -31,11 +35,22 @@ public class MainVerticle extends AbstractVerticle {
     server.listen(8888, http -> {
       if (http.succeeded()) {
         promise.complete(); // complete the promise with success
-        System.out.println("HTTP server started at: http://localhost:8888");
+        System.out.println("HTTP server started at: http://localhost:8888\n");
       } else {
         promise.fail(http.cause()); // fail the promise
       }
     });
+
+    // When Vert.x provides an event to a handler or calls the start or stop methods of a Verticle
+    // ex. usually a context is an event-loop context and is tied to a specific event loop thread
+    Context context = vertx.getOrCreateContext();
+    if (context.isEventLoopContext()) {
+      System.out.println("Context attached to Event Loop\n");
+    } else if (context.isWorkerContext()) {
+      System.out.println("Context attached to Worker Thread\n");
+    } else if (! Context.isOnVertxThread()) {
+      System.out.println("Context not attached to a thread managed by vert.x\n");
+    }
   }
 
   // synchronous start(): there should be no blocking the even loop inside the start() method
