@@ -14,8 +14,6 @@ public class EventBusVerticle extends AbstractVerticle  {
     //   it supports publish/subscribe, point-to-point, and request-response messaging
     EventBus eventBus = vertx.eventBus();
 
-    // 1) publish/subscribe messaging:
-
     // consumer subscribes an event bus address
 
     // ex1. register a handler to a given address, ex. example.address
@@ -39,15 +37,15 @@ public class EventBusVerticle extends AbstractVerticle  {
 
     // producer publish/send a message to a given address
 
-    // ex1. publish a message to all subscribers
+    // 1) publish/subscribe messaging: "publish" a message to all subscribers
     eventBus.publish("example.address", "publish to all subscribers of example.address");
     // the message will be delivered to all subscribers registered against the example.address
 
-    // ex2. send a message
-    // send a message to a single subscriber of a given address (the subscriber is chosen in a non-strict round-robin fashion)
+    // 2) point-to-point messaging: "send" a message to just one of the handlers registered at that address (the subscriber is chosen in a non-strict round-robin fashion)
+    // send a message to a single subscriber of a given address
     eventBus.send("example.address", "send to a single subscriber of example.address");
 
-    // 2) request-response messaging:
+    // 3) request-response messaging:
 
     // consumer acknowledge/reply a message to the producer (request-response pattern)
     //      message.reply: consumer to register a handler to a given address
